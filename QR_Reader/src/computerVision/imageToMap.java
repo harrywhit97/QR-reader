@@ -2,26 +2,16 @@ package computerVision;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 
 /**
  * 
  * @author Harry Whittaker
  * @since 13/02/2018
- * 
+ *  
  *
  */
 public class imageToMap {
-	 public static void main(String[] args) throws IOException{		 
-		 		 
-		 File input = new File("QR.jpg");
-         BufferedImage image = ImageIO.read(input);	         
-         
-         boolean[][] map = covertImageToMap(image);		 
-	 }
-	 
+	 	 
 	 /**
 	  * Converts a buffered image of a QR code where the code takes up the entire image
 	  * and is correctly positioned
@@ -48,14 +38,14 @@ public class imageToMap {
 	 /**
 	  * Get the pixel length of a side of a single box in the QR code
 	  * @param image
-	  * @return pixel length of the side of a box
+	  * @return pixel length of the side of a box, return -1 if no white boxes exist
 	  */
 	 private static int getSizeOfBox(BufferedImage image){
 		 
 		 for(int i = 0; i < image.getWidth(); i++){
 			 
 			 if(!isBlack(new Color(image.getRGB(i, 0))))
-				 //7black boxes in first row before first white box
+				 //7 black boxes in first row before first white box
 				 return i/7;
 		 }
 		 return -1;

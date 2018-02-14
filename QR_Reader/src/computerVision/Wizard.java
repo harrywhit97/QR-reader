@@ -6,13 +6,13 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class wizard {
+public class Wizard {
 	public static void main(String[] args) throws IOException{		 
 		 
 		File input = new File("QR.jpg");
         BufferedImage image = ImageIO.read(input);	         
                 
-        QR qr = new QR(imageToMap.covertImageToMap(image));
+        QR qr = new QR(ImageToMap.covertImageToMap(image));
         
         printMap(qr);        
         
@@ -20,7 +20,7 @@ public class wizard {
         System.out.println("Error correction level: " + qr.getErrorCorrection());
         System.out.println("Mask: " + qr.getMask());
         
-        qr.unMask();
+        qr.setMap(qr.unMask());
         
         System.out.println();
         

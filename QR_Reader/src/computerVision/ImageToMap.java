@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
  *  
  *
  */
-public class imageToMap {
+public class ImageToMap {
 	 	 
 	 /**
 	  * Converts a buffered image of a QR code where the code takes up the entire image

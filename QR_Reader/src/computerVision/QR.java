@@ -7,15 +7,16 @@ public class QR {
 	private ErrorCorrection ec;
 	private int messageLength;
 	private EncodingLevel encodingLevel;
-	private AlignmentPattern[] alignemntPatterns;
+	private AlignmentPattern[] alignmentPatterns;
 	
 	QR(boolean[][] _map){
 		map = _map;
 		mask = findMask();
 		ec = findErrorCorrection();
+		map = unMask();
 		encodingLevel = findEncodingLevel();
-		alignemntPatterns = findAlignemntPatterns();
-		//length = findLength();
+		alignmentPatterns = findAlignemntPatterns();
+		messageLength = findMessageLength();		
 	}
 	
 	public Mask getMask(){
@@ -92,27 +93,95 @@ public class QR {
 		return map;
 	}
 	
-	/*
-	private int findLength(){
-		int len = 0;
-		for(int i = 0; i < 8; i++){
-			int xDiff = i % 2;
-			int yDiff = 1 / 2;
-			
-			if(map[y - yDiff][x - xDiff])
-				len += 2 ^ i;
+	public void printMap(int[] h){
+		for(int i = 0; i < map.length; i++){
+			for(int j = 0; j < map.length; j++){
+				int[] a = {j,i};
+				if(i == h[1] && j == h[0]){
+					System.out.print("$");
+					
+				}else{
+					BitType bt = BitType.getBitType(this, a);
+					switch(bt){
+					case Valid:
+						System.out.print("+");
+						break;
+					case NotValid:
+						System.out.print("-");
+						break;
+					case Alignment:
+						System.out.print("a");
+						break;
+					case Timing:
+						System.out.print("|");
+						break;
+					}
+				}
+				
+			}
+			System.out.println();
 		}
-		return (char)result;
-
-		
-		-6
-	}*/
+		System.out.println();
+		System.out.println();
+	}
 	
+	public void printMap(){
+		for(int i = 0; i < map.length; i++){
+			for(int j = 0; j < map.length; j++){
+				int[] a = {j,i};
+				BitType bt = BitType.getBitType(this, a);
+				switch(bt){
+				case Valid:
+					System.out.print("+");
+					break;
+				case NotValid:
+					System.out.print("-");
+					break;
+				case Alignment:
+					System.out.print("a");
+					break;
+				case Timing:
+					System.out.print("|");
+					break;
+				}				
+			}
+			System.out.println();
+		}
+	}
+	
+	
+	private int findMessageLength(){
+		int len = 0;
+		int x = map.length - 1;
+		int y = map.length - 3;
+		
+		for(int i = 0; i < 8; i++){
+			if(map[y][x]){
+				len |= 1;
+			}
+			if(i < 7){
+				len = len << 1;
+			}
+			
+			
+			if(x % 2 == 0){
+				x--;
+			}else{
+				x++;
+				y--;
+			}			
+		}
+		return len;
+	}
+	
+	public AlignmentPattern[] getAlignmentPatterns(){
+		return alignmentPatterns;
+	}
 	
 	private AlignmentPattern[] findAlignemntPatterns(){
 		//TO DO AlignmentPattern detection - hardcoded for now
 		AlignmentPattern[] patterns = new AlignmentPattern[1];		
-		patterns[1] = new AlignmentPattern(map.length-7, map.length-7);
+		patterns[0] = new AlignmentPattern(map.length-7, map.length-7);
 		return patterns;
 	}
 	
@@ -128,6 +197,7 @@ public class QR {
 		int[] a = {map.length-1, map.length-7};
 		return a;
 	}
+	
 	private EncodingLevel findEncodingLevel(){
 		int enc = 0;
 		int bit = 1;
@@ -141,7 +211,6 @@ public class QR {
 		try {
 			return EncodingLevel.getByValue(enc);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}

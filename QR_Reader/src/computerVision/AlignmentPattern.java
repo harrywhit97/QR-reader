@@ -3,31 +3,25 @@ package computerVision;
 public class AlignmentPattern {
 	
 	//top left cell of pattern	
-	private int startX, startY;
+	private int[] startXY;
 	
 	//bottom right cell of pattern
-	private int endX, endY;
+	private int[] endXY;
 	
 	AlignmentPattern(int patternCenterX, int patternCenterY){
-		startX = patternCenterX-2;
-		startY = patternCenterY-2;
-		endX = patternCenterX + 2;
-		endY = patternCenterY + 2;
+		startXY = new int [2];
+		endXY = new int [2];
+		startXY[0] = patternCenterX-2;
+		startXY[1] = patternCenterY-2;
+		endXY[0] = patternCenterX + 2;
+		endXY[1] = patternCenterY + 2;
 	}
 	
-	public int getStartX(){
-		return startX;
-	}
-
-	public int getStartY(){
-		return startY;
+	public int[] getStartCoords(){
+		return startXY;
 	}
 	
-	public int getEndX(){
-		return endX;
-	}
-	
-	public int getEndtX(){
-		return endY;
+	public int[] getEndCoords(){
+		return endXY;
 	}
 }

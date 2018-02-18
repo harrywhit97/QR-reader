@@ -7,12 +7,14 @@ public class QR {
 	private ErrorCorrection ec;
 	private int messageLength;
 	private EncodingLevel encodingLevel;
+	private AlignmentPattern[] alignemntPatterns;
 	
 	QR(boolean[][] _map){
 		map = _map;
 		mask = findMask();
 		ec = findErrorCorrection();
 		encodingLevel = findEncodingLevel();
+		alignemntPatterns = findAlignemntPatterns();
 		//length = findLength();
 	}
 	
@@ -90,6 +92,7 @@ public class QR {
 		return map;
 	}
 	
+	/*
 	private int findLength(){
 		int len = 0;
 		for(int i = 0; i < 8; i++){
@@ -103,12 +106,28 @@ public class QR {
 
 		
 		-6
+	}*/
+	
+	
+	private AlignmentPattern[] findAlignemntPatterns(){
+		//TO DO AlignmentPattern detection - hardcoded for now
+		AlignmentPattern[] patterns = new AlignmentPattern[1];		
+		patterns[1] = new AlignmentPattern(map.length-7, map.length-7);
+		return patterns;
 	}
 	
 	public int getMessageLength(){
 		return messageLength;
 	}
 	
+	public int getSize(){
+		return map.length;
+	}
+	
+	public int[] getMessageStartCoords(){
+		int[] a = {map.length-1, map.length-7};
+		return a;
+	}
 	private EncodingLevel findEncodingLevel(){
 		int enc = 0;
 		int bit = 1;

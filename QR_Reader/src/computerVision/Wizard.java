@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 
 public class Wizard {
 	public static void main(String[] args) throws IOException{		 
-		 //https://internationalbarcodes.com
+		 //https://internationalbarcodes.com/
 		File input = new File("QR.jpg");
         BufferedImage image = ImageIO.read(input);	         
                 
@@ -19,6 +19,7 @@ public class Wizard {
         System.out.println();
         System.out.println("Error correction level: " + qr.getErrorCorrection());
         System.out.println("Mask: " + qr.getMask());
+        System.out.println("Message Length: " + qr.getMessageLength());
         
      
         

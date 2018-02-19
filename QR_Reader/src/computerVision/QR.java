@@ -12,10 +12,10 @@ public class QR {
 	QR(boolean[][] _map){
 		map = _map;
 		mask = findMask();
-		ec = findErrorCorrection();
-		map = unMask();
-		encodingLevel = findEncodingLevel();
+		ec = findErrorCorrection();		
 		alignmentPatterns = findAlignemntPatterns();
+		unMask();
+		encodingLevel = findEncodingLevel();		
 		messageLength = findMessageLength();		
 	}
 	
@@ -29,11 +29,14 @@ public class QR {
 	
 	private Mask findMask(){
 		int mask = 0;
+		int bit = 1;
 		
-		for(int i = 2; i < 5; i++){
+		for(int i = 4; i > 2; i--){
 			if(map[8][i])
-				mask += 5-i;
+				mask += bit;
+			bit *= 2;
 		}
+		
 		
 		try {
 			return Mask.getByValue(mask);
@@ -50,11 +53,14 @@ public class QR {
 	
 	private ErrorCorrection findErrorCorrection(){
 		int ecLvl = 0;
+		int bit = 1;
 		
-		for(int i = 0; i < 2; i++){
+		for(int i = 1; i >= 0; i--){
 			if(map[8][i])
-				ecLvl += 2-i;
+				ecLvl += bit;
+			bit *= 2;
 		}
+		 
 		
 		try {
 			return ErrorCorrection.getByValue(ecLvl);
@@ -65,7 +71,21 @@ public class QR {
 		return null;
 	}
 	
-	public boolean[][] unMask(){
+	public void unMask(){
+		
+		for(int y = 0; y < map.length; y++){
+			int[] bit = {0,y};
+			if(!BitType.getBitType(this, bit).equals(BitType.Timing)){
+				for(int x = 0; x < map.length; x++){
+					bit[0] = x;
+					if(BitType.getBitType(this, bit).equals(BitType.Valid) && mask.invertRequired(x, y)){
+						map[x][y] = !map[x][y];
+					}
+				}
+			}			
+		}
+		
+		/*
 		//unmask top and left section				
 		for(int y = 0; y < 9; y++){
 			if(y != 6){
@@ -77,7 +97,7 @@ public class QR {
 						map[x][y] = !map[x][y];
 				}
 			}			
-		}		
+		}
 		
 		//unmask main section		
 		for(int y = 9; y < map.length; y++){
@@ -85,8 +105,7 @@ public class QR {
 				if(mask.invertRequired(x, y))
 					map[y][x] = !map[y][x];
 			}
-		}			
-		return map;
+		}			*/
 	}
 	
 	public boolean[][] getMap(){
@@ -94,6 +113,7 @@ public class QR {
 	}
 	
 	public void printMap(int[] h){
+		
 		for(int i = 0; i < map.length; i++){
 			for(int j = 0; j < map.length; j++){
 				int[] a = {j,i};
@@ -125,6 +145,41 @@ public class QR {
 		System.out.println();
 	}
 	
+	
+	public String getStringMap(int[] h){
+		String s = "";
+		String newLine = "\r\n";
+		for(int i = 0; i < map.length; i++){
+			for(int j = 0; j < map.length; j++){
+				int[] a = {j,i};
+				if(i == h[1] && j == h[0]){
+					s += "$";
+					
+				}else{
+					BitType bt = BitType.getBitType(this, a);
+					switch(bt){
+					case Valid:
+						s += "+";
+						break;
+					case NotValid:
+						s += "-";
+						break;
+					case Alignment:
+						s += "a";
+						break;
+					case Timing:
+						s += "|";
+						break;
+					}
+				}
+				
+			}
+			s+= newLine;
+		}
+		s+= newLine+newLine;
+		return s;
+	}
+	
 	public void printMap(){
 		for(int i = 0; i < map.length; i++){
 			for(int j = 0; j < map.length; j++){
@@ -148,7 +203,6 @@ public class QR {
 			System.out.println();
 		}
 	}
-	
 	
 	private int findMessageLength(){
 		int len = 0;
@@ -197,6 +251,7 @@ public class QR {
 		int[] a = {map.length-1, map.length-7};
 		return a;
 	}
+	
 	
 	private EncodingLevel findEncodingLevel(){
 		int enc = 0;

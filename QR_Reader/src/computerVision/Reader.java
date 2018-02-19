@@ -1,5 +1,9 @@
 package computerVision;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 public class Reader {
 	
 	private final int X = 0;
@@ -8,8 +12,16 @@ public class Reader {
 	private QR qr;
 	private int currentBit[];
 	
+	private String bitLog = "";
+	private PrintWriter writer = null;
+	
 	Reader(){
-		
+		try {
+			writer = new PrintWriter("runLog.txt", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public String read(QR _qr) throws Exception{
@@ -17,29 +29,27 @@ public class Reader {
 		qr = _qr;
 		currentBit = qr.getMessageStartCoords();
 		for(int i = 0; i < qr.getMessageLength(); i++){
-			
-			
-			
-			
-			
-			if(i == 4) 
-				System.out.println("4");
-			
-			
-			
-			
+			bitLog += "byte " + i + "\r\n";
 			
 			int nextByte = readNextByte();
 			if(nextByte != -1){
 				System.out.println(nextByte);
-				message += (char)(toAscii(nextByte));
+				message += (char)nextByte;
 			}else{
 				throw new Exception("Error: end of QR reached");
 			}
 			
 		}
+		
+		writeToFile();
 		 
 		return message;
+	}
+	
+	private void writeToFile(){
+		writer.println(bitLog);
+		
+		writer.close();
 	}
 	
 	
@@ -47,7 +57,12 @@ public class Reader {
 		int b = 0;
 		
 		for(int i = 0; i < 8; i++){
+			
+			
 			//qr.printMap(currentBit);
+			bitLog += "bit " + i + " is - " + qr.getMap()[currentBit[Y]][currentBit[X]] + "\r\n"; 
+			bitLog += qr.getStringMap(currentBit);
+			
 			
 			if(qr.getMap()[currentBit[Y]][currentBit[X]])
 				b |= 1;
@@ -83,7 +98,6 @@ public class Reader {
 	
 	private boolean getNextBit() throws Exception{
 		int[] bit = {currentBit[X], currentBit[Y]};
-	//	bit[X]= currentBit;
 		
 		
 		

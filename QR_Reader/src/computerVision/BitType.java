@@ -39,7 +39,7 @@ public enum BitType {
 		int formatting = 1;
 		
 		//Right top
-		int[] finderStart = {qrLength - FINDERLENGTH, 0}; 
+		int[] finderStart = {qrLength - (FINDERLENGTH - formatting), 0}; 
 		int[] finderEnd = {qrLength, FINDERLENGTH}; 
 		
 		if(isWithIn(finderStart, finderEnd, bit))

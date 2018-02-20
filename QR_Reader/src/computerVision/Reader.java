@@ -11,6 +11,7 @@ public class Reader {
 	
 	private QR qr;
 	private int currentBit[];
+	private boolean[][] seen;
 	
 	private String bitLog = "";
 	private PrintWriter writer = null;
@@ -25,9 +26,11 @@ public class Reader {
 	}
 	
 	public String read(QR _qr) throws Exception{
-		String message = "";
 		qr = _qr;
+		String message = "";
+		initSeen(qr.getMap().length);		
 		currentBit = qr.getMessageStartCoords();
+		
 		for(int i = 0; i < qr.getMessageLength(); i++){
 			bitLog += "byte " + i + "\r\n";
 			
@@ -46,9 +49,17 @@ public class Reader {
 		return message;
 	}
 	
+	private void initSeen(int length){
+		seen = new boolean[length][length];
+		for(int i = 0; i < length; i++){
+			for(int j = 0; j < length; j++){
+				seen[i][j] = false;
+			}
+		}
+	}
+	
 	private void writeToFile(){
-		writer.println(bitLog);
-		
+		writer.println(bitLog);		
 		writer.close();
 	}
 	
@@ -57,7 +68,7 @@ public class Reader {
 		int b = 0;
 		
 		for(int i = 0; i < 8; i++){
-			
+			seen[currentBit[Y]][currentBit[X]] = true;
 			
 			//qr.printMap(currentBit);
 			bitLog += "bit " + i + " is - " + qr.getMap()[currentBit[Y]][currentBit[X]] + "\r\n"; 
@@ -118,10 +129,13 @@ public class Reader {
 		BitType bitType = BitType.getBitType(qr, bit);
 		
 		switch(bitType){
-		
+			case Valid:
+				if(seen[bit[Y]][bit[X]] == true)
+					bit = moveLeft(currentBit);
+				break;
 			case NotValid:
-				bit[X] = currentBit[X] - 1;
-				bit[Y] = currentBit[Y];
+				bit = moveLeft(currentBit);
+				
 				bitType = BitType.getBitType(qr, bit);
 				
 				if(!isValid(qr, bit)){
@@ -139,21 +153,21 @@ public class Reader {
 				break;
 				
 			case Alignment:
-				//bit[X] = currentBit[X];
-				if(isUp(currentBit[X])){
-					while(!isValid(qr, bit)){
-						bit = moveUp(bit);
-					}
-					
+				int[] tempBit = {bit[X], bit[Y]};
+				if(isValid(qr, moveLeft(tempBit))){
+					bit = moveLeft(bit);
 				}else{
-					bit[Y] = currentBit[Y] + 1;
-					if(!isValid(qr, bit)){
-						bit = moveLeft(bit);
+					if(isUp(currentBit[X])){
+						while(!isValid(qr, bit)){
+							bit = moveUp(bit);
+						}
+						
+					}else{
 						while(!isValid(qr, bit)){
 							bit = moveDown(bit);
 						}
 					}
-				}
+				}				
 				break;
 				
 			case Timing:
@@ -163,6 +177,7 @@ public class Reader {
 					bit = moveLeft(bit);
 				}
 				break;
+				
 				
 			default:
 				break;	
@@ -176,22 +191,22 @@ public class Reader {
 	}
 	
 	private int[] moveUp(int[] bit){
-		bit[1]--;
+		bit[Y]--;
 		return bit;
 	}
 	
 	private int[] moveDown(int[] bit){
-		bit[1]++;
+		bit[Y]++;
 		return bit;
 	}
 	
 	private int[] moveLeft(int[] bit){
-		bit[0]--;
+		bit[X]--;
 		return bit;
 	}
 	
 	private int[] moveRight(int[] bit){
-		bit[0]++;
+		bit[X]++;
 		return bit;
 	}
 	

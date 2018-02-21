@@ -72,40 +72,21 @@ public class QR {
 	}
 	
 	public void unMask(){
-		
+		int[] bit = new int[2];
 		for(int y = 0; y < map.length; y++){
-			int[] bit = {0,y};
-			if(!BitType.getBitType(this, bit).equals(BitType.Timing)){
-				for(int x = 0; x < map.length; x++){
-					bit[0] = x;
-					if(BitType.getBitType(this, bit).equals(BitType.Valid) && mask.invertRequired(x, y)){
-						map[x][y] = !map[x][y];
-					}
-				}
-			}			
-		}
-		
-		/*
-		//unmask top and left section				
-		for(int y = 0; y < 9; y++){
-			if(y != 6){
-				for(int x = 9; x < map.length - 7; x++){
-					if(mask.invertRequired(x, y))
-						map[y][x] = !map[y][x];
+			bit[1] = y;
+			for(int x = 0; x < map.length; x++){
+				bit[0] = x;				
+								
+				if(BitType.getBitType(this, bit).equals(BitType.Valid)){
+					//if(y < 6)
+						///bit[1]++;
 					
-					if(mask.invertRequired(y, x))
+					if(mask.invertRequired(x, bit[1]))
 						map[x][y] = !map[x][y];
 				}
-			}			
+			}						
 		}
-		
-		//unmask main section		
-		for(int y = 9; y < map.length; y++){
-			for(int x = 9; x < map.length; x++){
-				if(mask.invertRequired(x, y))
-					map[y][x] = !map[y][x];
-			}
-		}			*/
 	}
 	
 	public boolean[][] getMap(){

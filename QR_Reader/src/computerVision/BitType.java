@@ -17,7 +17,7 @@ public enum BitType {
 		return Valid;
 	}
 	
-	private static boolean isTiming(int[] bit){
+	public static boolean isTiming(int[] bit){
 		if(bit[0] == 6 || bit[1] == 6)
 			return true;
 		return false;
@@ -35,7 +35,7 @@ public enum BitType {
 	 * @param qrLength size of qr -1 so map[qrLength][qrLength] = last bit in qr
 	 * @return
 	 */
-	private static boolean isFinderOrFormatting(int bit[], int qrLength){
+	public static boolean isFinderOrFormatting(int bit[], int qrLength){
 		int formatting = 1;
 		
 		//Right top

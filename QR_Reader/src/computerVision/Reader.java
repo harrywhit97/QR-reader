@@ -36,10 +36,10 @@ public class Reader {
 			
 			int nextByte = readNextByte();
 			if(nextByte != -1){
-				System.out.println(nextByte);
+				System.out.println( i + " - " +nextByte);
 				message += (char)nextByte;
 			}else{
-				throw new Exception("Error: end of QR reached");
+				break;
 			}
 			
 		}
@@ -108,15 +108,7 @@ public class Reader {
 	}
 	
 	private boolean getNextBit() throws Exception{
-		int[] bit = {currentBit[X], currentBit[Y]};
-		
-		
-		
-		if(currentBit[X] == 27 && currentBit[Y] == 10){
-			System.out.println();
-		}
-		
-		
+		int[] bit = {currentBit[X], currentBit[Y]};		
 		
 		//zigzag
 		if(bit[X] % 2 == 0){
@@ -130,60 +122,78 @@ public class Reader {
 		
 		switch(bitType){
 			case Valid:
-				if(seen[bit[Y]][bit[X]] == true)
-					bit = moveLeft(currentBit);
+				if(seen[bit[Y]][bit[X]] == true){
+					currentBit = moveLeft(currentBit);
+				}else{
+					currentBit = bit;
+				}
+				
 				break;
 			case NotValid:
-				bit = moveLeft(currentBit);
-				
-				bitType = BitType.getBitType(qr, bit);
-				
-				if(!isValid(qr, bit)){
-					//bit is either end bit (0,x-9) or 10,x
-					if(bit[X] != 0){
-						//bit is (10,x)
-						bit[Y] = qr.getSize()-10;
-						if(!isValid(qr, bit))
-							throw new Exception("ERROR : UNKNOWN BIT, CURRENT BIT IS - (" + bit[X] + ", " + bit[Y] + ")");
-					}else{
-						//There is no next bit
-						return false;
-					}
-				}
+				currentBit = nextBitFromNotValid(bit);
 				break;
 				
 			case Alignment:
-				int[] tempBit = {bit[X], bit[Y]};
-				if(isValid(qr, moveLeft(tempBit))){
-					bit = moveLeft(bit);
-				}else{
-					if(isUp(currentBit[X])){
-						while(!isValid(qr, bit)){
-							bit = moveUp(bit);
-						}
-						
-					}else{
-						while(!isValid(qr, bit)){
-							bit = moveDown(bit);
-						}
-					}
-				}				
+				currentBit = nextBitFromAllignment(bit);		
+				if(currentBit[X] == -1 && currentBit[Y] == -1)
+					return false;
 				break;
 				
 			case Timing:
-				if(bit[X] == 6){
-					bit[Y] = isUp(bit[X]) ? bit[Y] - 1 : bit[Y] + 1;
-				}else{
-					bit = moveLeft(bit);
-				}
-				break;
-				
+				currentBit = nextBitFromTiming(bit);
+				break;				
 				
 			default:
 				break;	
 		}
-		currentBit = bit;
 		return true;
+	}
+	
+	private int[] nextBitFromTiming(int[] bit){
+		if(bit[Y] == 6){
+			bit[Y] = isUp(bit[X]) ? bit[Y] - 1 : bit[Y] + 1;
+		}else{
+			bit = moveLeft(bit);
+		}
+		return bit;
+	}
+	
+	private int[] nextBitFromAllignment(int[] bit){
+		int[] tempBit = {bit[X], bit[Y]};
+		if(isValid(qr, moveLeft(tempBit))){
+			bit = moveLeft(bit);
+		}else{
+			if(isUp(currentBit[X])){
+				while(!isValid(qr, bit)){
+					bit = moveUp(bit);
+				}
+				
+			}else{
+				while(!isValid(qr, bit)){
+					bit = moveDown(bit);
+				}
+			}
+		}	
+		return bit;
+	}
+	
+	private int[] nextBitFromNotValid(int[] bit) throws Exception{
+		bit = moveLeft(currentBit);
+		
+		if(!isValid(qr, bit)){
+			
+			if(bit[X] >= 0){
+				//bit is (10,x)
+				bit[Y] = qr.getSize()-10;
+				if(!isValid(qr, bit))
+					throw new Exception("ERROR : UNKNOWN BIT, CURRENT BIT IS - (" + bit[X] + ", " + bit[Y] + ")");
+			}else{
+				//There is no next bit
+				bit[X] = -1;
+				bit[Y] = -1;
+			}
+		}
+		return bit;
 	}
 	
 	private boolean isValid(QR qr, int[] bit){
